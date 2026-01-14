@@ -83,193 +83,153 @@ Los checkers típicamente reportan:
 
 ---
 
-## Convenciones y tolerancias numéricas
+## Organización de ejercicios
 
-En geometría computacional y escenas 3D es normal trabajar con tolerancias.
-Los ejercicios utilizarán un \(\varepsilon\) configurable para comparaciones aproximadas, por ejemplo:
-
-- distancias: \(|d - d_{\text{esperado}}| < \varepsilon\)
-- ángulos: \(|\theta - \theta_{\text{esperado}}| < \varepsilon\)
-- sumas de pesos: \(\max(|\sum B_i - 1|) < \varepsilon\)
+> Nota de compatibilidad (GitHub Markdown): en este README se evitan símbolos LaTeX que no se renderizan en GitHub (por ejemplo `\varepsilon`).  
+> Cuando se use tolerancia numérica se escribirá como **EPS** y se definirá en cada script/checker (por ejemplo `EPS = 1e-5`).
 
 ---
 
-## Guía visual de la relación teoría/práctica
+## Bloque 1 — Vectores y transformaciones
 
-Cada bloque está diseñado para que el alumnado:
-
-1) construya el objeto/escena,
-2) visualice el concepto,
-3) mida el resultado,
-4) lo valide con el checker.
-
-
----
-
-# Organización de ejercicios
-
-## Bloque 1 - Vectores y transformaciones
-
-### 1.1 - Traslación como suma de vectores
+### 1.1 — Traslación como suma de vectores
 - **Interfaz (UI):** mover un vértice u objeto aplicando un vector de traslación dado.
-- **Python:** crear un punto \(P\), un vector \(t\) y calcular \(P' = P + t\).
-- **Visualización:** flechas de \(P\), \(t\) y \(P'\).
-- **Verificación (checker):** distancia entre \(P'\) y \(P+t\) menor que \(\varepsilon\).
+- **Python:** crear un punto `P`, un vector `t` y calcular `P' = P + t`.
+- **Visualización:** flechas de `P`, `t` y `P'`.
+- **Verificación (checker):** `dist(P', P + t) < EPS`.
 
-### 1.2 - Escalado respecto a un pivote
+### 1.2 — Escalado respecto a un pivote
 - **Interfaz (UI):** escalar un conjunto de vértices respecto al *3D Cursor* (pivote).
-- **Python:** implementar \(P' = C + k(P-C)\) y comparar con la transformación de Blender.
-- **Visualización:** antes/después y líneas al pivote \(C\).
-- **Verificación (checker):** cociente de distancias al pivote aproximadamente \(k\) (tolerancia \(\varepsilon\)).
+- **Python:** implementar `P' = C + k(P - C)` y comparar con la transformación aplicada por Blender.
+- **Visualización:** antes/después y líneas al pivote `C`.
+- **Verificación (checker):** `abs( dist(P', C) / dist(P, C) - k ) < EPS` (para puntos con `P != C`).
 
-### 1.3 - Norma (módulo) y normalización
+### 1.3 — Norma (módulo) y normalización
 - **Interfaz (UI):** medir distancias y compararlas con la longitud de un vector.
-- **Python:** normalizar \(\hat v = v/\|v\|\) y verificar \(\|\hat v\| = 1\).
+- **Python:** normalizar `v_hat = v / |v|` y verificar que `|v_hat| = 1`.
 - **Visualización:** flecha original y flecha normalizada.
-- **Verificación (checker):** \(\lvert\|\hat v\|-1\rvert < \varepsilon\).
+- **Verificación (checker):** `abs(|v_hat| - 1) < EPS`.
 
-### 1.4 - Inspector de vectores (álgebra lineal con `mathutils`)
+### 1.4 — Inspector de vectores (álgebra lineal con `mathutils`)
 - **Objetivo:** validar posiciones, distancias y ángulos entre objetos usando `mathutils`.
-- **Tarea:** script con dos objetos seleccionados (`bpy.context.selected_objects`) que calcule:
-  - vector diferencia y distancia relativa,
-  - producto escalar entre ejes Y locales (vectores frontales),
-  - ángulo en grados entre esos vectores.
-- **Conexión teórica:** producto escalar cercano a 1 si orientaciones coinciden; cercano a 0 si son perpendiculares.
+- **Tarea (Python):** con dos objetos seleccionados (`bpy.context.selected_objects`), calcular:
+  - vector diferencia `d = B.location - A.location` y su distancia `|d|`,
+  - producto escalar entre los ejes Y locales (vectores frontales),
+  - ángulo en grados entre dichos ejes.
+- **Conexión teórica:** dot cercano a 1 si las orientaciones coinciden; cercano a 0 si son perpendiculares.
 
 ---
 
-## Bloque 2 - Producto escalar: ángulo, ortogonalidad y sombreado
+## Bloque 2 — Producto escalar: ángulo, ortogonalidad y sombreado
 
-### 2.1 - Producto escalar como medida de alineamiento
+### 2.1 — Producto escalar como medida de alineamiento
 - **Interfaz (UI):** rotar un objeto/flecha y observar el cambio angular.
-- **Python:** calcular \(u\cdot v\), \(\cos(\theta)\) y \(\theta\); mostrar resultados.
+- **Python:** calcular `dot(u, v)`, `cos(theta)` y `theta`; mostrar resultados.
 - **Visualización:** etiqueta o indicador con dot y ángulo.
 
-### 2.2 - Ortogonalidad: construcción de un vector perpendicular
+### 2.2 — Ortogonalidad: construcción de un vector perpendicular
 - **Interfaz (UI):** construir una dirección perpendicular en el plano XY y comprobarlo.
-- **Python:** generar \(u=(a,b)\), \(v=(-b,a)\) y verificar \(u\cdot v=0\).
-- **Verificación (checker):** \(u\cdot v \approx 0\) con tolerancia \(\varepsilon\).
+- **Python:** generar `u = (a, b)` y `v = (-b, a)` y verificar `dot(u, v) = 0`.
+- **Verificación (checker):** `abs(dot(u, v)) < EPS`.
 
-### 2.3 - Sombreado difuso tipo Lambert con normales
+### 2.3 — Sombreado difuso tipo Lambert con normales
 - **Interfaz (UI):** plano + luz direccional; rotación del plano y observación del brillo.
-- **Python:** leer normal \(N\) y dirección a luz \(L\), calcular \(\max(0, N\cdot L)\) y mapear a material/color.
-- **Visualización:** cambio de color según \(N\cdot L\).
-- **Verificación (checker):** ortogonal ≈ 0; alineado ≈ máximo.
+- **Python:** leer normal `N` y dirección a luz `L`, calcular `I = max(0, dot(N, L))` y mapear a material/color.
+- **Visualización:** cambio de color según `I`.
+- **Verificación (checker):**
+  - caso ortogonal: `I` cercano a 0,
+  - caso alineado: `I` cercano a 1 (si `N` y `L` están normalizados).
 
-### 2.4 - Normales y sombreado por umbral (producto escalar)
+### 2.4 — Normales y sombreado por umbral (producto escalar)
 - **Objetivo:** colorear caras según umbral de iluminación.
-- **Tarea:** iterar polígonos y colorear si \(\vec{n}\cdot\vec{L} > 0.5\).
-- **Conexión teórica:** uso directo de \(\vec{u}\cdot\vec{v}=\|\vec{u}\|\,\|\vec{v}\|\cos(\theta)\).
+- **Tarea (Python):** iterar polígonos y colorear si `dot(n, L) > 0.5`.
+- **Conexión teórica:** uso del producto escalar como criterio de alineamiento entre normal y luz.
 
 ---
 
-## Bloque 3 - Curvas: representación explícita, implícita y paramétrica
+## Bloque 3 — Curvas: representación explícita, implícita y paramétrica
 
-### 3.1 - Curva explícita: muestreo de \(y=f(x)\)
-- **Python:** muestrear \(x\) y crear vértices \((x, f(x), 0)\) conectados.
+### 3.1 — Curva explícita: muestreo de y = f(x)
+- **Python:** muestrear `x` y crear vértices `(x, f(x), 0)` conectados.
 - **Objetivo:** evaluación directa; limitación para curvas cerradas completas.
 
-### 3.2 - Curva implícita: circunferencia como condición \(F(x,y)=0\)
-- **Python:** muestrear rejilla y seleccionar puntos con \(\lvert x^2+y^2-R^2\rvert < \varepsilon\).
+### 3.2 — Curva implícita: circunferencia como condición F(x, y) = 0
+- **Python:** muestrear rejilla y seleccionar puntos con `abs(x*x + y*y - R*R) < EPS`.
 - **Objetivo:** test de pertenencia y dificultad de recorrido ordenado.
 
-### 3.3 - Curva paramétrica: circunferencia como \(\vec{P}(u)\)
-- **Python:** muestrear \(u\) y construir \(\vec{P}(u)\); comparar con la forma implícita.
+### 3.3 — Curva paramétrica: circunferencia como P(u)
+- **Python:** muestrear `u` y construir `P(u)`; comparar con la forma implícita.
 - **Objetivo:** recorrido secuencial natural.
-- **Verificación (checker):** ordenación paramétrica, resolución, longitud aproximada.
+- **Verificación (checker):** métricas simples (por ejemplo, distancia al centro cercana a `R` para todos los puntos, y resolución consistente).
 
-### 3.4 - Generador de curvas paramétricas
+### 3.4 — Generador de curvas paramétricas
 - **Objetivo:** crear geometría a partir de ecuaciones paramétricas.
-- **Tarea:** generar hélice o curva en “S” mediante muestreo de \(u\) y creación de un objeto `Curve`.
-- **Fórmulas:**
-
-  \[
-  x(u)=a\cos(u)
-  \]
-  \[
-  y(u)=a\sin(u)
-  \]
-  \[
-  z(u)=bu
-  \]
-- **Conexión teórica:** efecto de la discretización de \(u\) en la resolución.
+- **Tarea (Python):** generar hélice o curva en “S” mediante muestreo de `u` y creación de un objeto `Curve`.
+- **Fórmulas de referencia:**
+  - `x(u) = a * cos(u)`
+  - `y(u) = a * sin(u)`
+  - `z(u) = b * u`
+- **Conexión teórica:** efecto de la discretización de `u` en la resolución.
 
 ---
 
-## Bloque 4 - Tangente y recta tangente en curvas paramétricas
+## Bloque 4 — Tangente y recta tangente en curvas paramétricas
 
-### 4.1 - Tangente como derivada numérica
-- **Python:** aproximar
+### 4.1 — Tangente como derivada numérica
+- **Python:** aproximar la derivada con diferencias centradas:
+  - `P'(u0) ≈ (P(u0 + h) - P(u0 - h)) / (2*h)`
+- **Visualización:** flecha tangente en `P(u0)`.
 
-  \[
-  \vec{P}'(u_0)\approx\frac{\vec{P}(u_0+h)-\vec{P}(u_0-h)}{2h}
-  \]
-- **Visualización:** flecha tangente en \(\vec{P}(u_0)\).
-
-### 4.2 - Recta tangente \(\vec{Q}(t)\)
-- **Python:** construir y dibujar
-
-  \[
-  \vec{Q}(t)=\vec{P}(u_0)+t\,\vec{P}'(u_0)
-  \]
-- **Interfaz (UI):** variar \(u_0\) con un control y observar el desplazamiento.
+### 4.2 — Recta tangente Q(t)
+- **Python:** construir y dibujar la recta:
+  - `Q(t) = P(u0) + t * P'(u0)`
+- **Interfaz (UI):** variar `u0` con un control y observar el desplazamiento.
 
 ---
 
-## Bloque 5 - Polinomios de Bernstein y curvas Bézier
+## Bloque 5 — Polinomios de Bernstein y curvas Bézier
 
-### 5.1 - Bernstein cúbico: evaluación y propiedad de suma
-- **Python:** evaluar \(B_{0,3}(u)\dots B_{3,3}(u)\) para \(u\in[0,1]\) y representarlos.
+### 5.1 — Bernstein cúbico: evaluación y propiedad de suma
+- **Python:** para `u` en `[0, 1]`, calcular `B0, B1, B2, B3` y representarlos.
 - **Visualización:** cuatro gráficas y una quinta para la suma.
-- **Verificación (checker):**
+- **Verificación (checker):** `max_abs( (B0 + B1 + B2 + B3) - 1 ) < EPS`.
 
-  \[
-  \max\left(\left| (B_{0,3}+B_{1,3}+B_{2,3}+B_{3,3})-1\right|\right)<\varepsilon
-  \]
-
-### 5.2 - Bézier cúbica por formulación de Bernstein
-- **Python:** construir
-
-  \[
-  \vec{P}(u)=\sum_{i=0}^{3}\vec{P}_i\,B_{i,3}(u)
-  \]
+### 5.2 — Bézier cúbica por formulación de Bernstein
+- **Python:** construir la curva a partir de puntos de control `P0..P3`:
+  - `P(u) = sum(Pi * Bi(u))`
 - **Comparación:** superponer con una curva Bézier creada con controles equivalentes en Blender.
-- **Objetivo:** equivalencia entre implementación Bernstein y curva Bézier en Blender.
+- **Objetivo:** equivalencia entre implementación basada en Bernstein y la curva Bézier en Blender.
 
-### 5.3 - Tangentes en extremos y relación con handles
-- **Python:** verificar
-
-  \[
-  \vec{P}'(0)=3(\vec{P}_1-\vec{P}_0)
-  \]
-  \[
-  \vec{P}'(1)=3(\vec{P}_3-\vec{P}_2)
-  \]
-- **Visualización:** flechas tangentes y handles.
-- **Verificación (checker):** diferencia angular menor que \(\varepsilon\).
+### 5.3 — Tangentes en extremos y relación con handles
+- **Python:** verificar empíricamente:
+  - `P'(0) = 3 * (P1 - P0)`
+  - `P'(1) = 3 * (P3 - P2)`
+- **Visualización:** flechas tangentes en los extremos y handles visibles.
+- **Verificación (checker):** diferencia angular entre direcciones menor que EPS (en radianes o grados, según se defina).
 
 ---
 
-## Bloque 6 - Splines y continuidad: \(C^0\), \(G^1\) y aproximación de \(C^1\)
+## Bloque 6 — Splines y continuidad: C0, G1 y aproximación de C1
 
-### 6.1 - Unión de dos tramos: \(C^0\) y aparición de quiebro
+### 6.1 — Unión de dos tramos: C0 y aparición de quiebro
 - **Interfaz (UI):** unir tramos con punto común y handles desalineados; observar discontinuidad.
 - **Python:** medir tangentes a izquierda y derecha del empalme.
 
-### 6.2 - Continuidad geométrica \(G^1\) en Blender
+### 6.2 — Continuidad geométrica G1 en Blender
 - **Interfaz (UI):** alinear handles en la unión (misma dirección tangente).
 - **Python:** comprobar proporcionalidad (ángulo cercano a 0).
-- **Verificación (checker):** \(\angle(T_{left},T_{right})<\varepsilon\).
+- **Verificación (checker):** `angle(T_left, T_right) < EPS_ANGLE`.
 
-### 6.3 - Aproximación de continuidad \(C^1\)
+### 6.3 — Aproximación de continuidad C1
 - **Interfaz (UI):** ajustar longitudes de handles para aproximar igualdad de tangentes.
 - **Python:** comprobar igualdad aproximada.
-- **Verificación (checker):** \(\|T_{left}-T_{right}\|<\varepsilon\).
+- **Verificación (checker):** `|T_left - T_right| < EPS`.
 
-### 6.4 - Test de continuidad (splines y derivadas)
-- **Objetivo:** manipular tangentes para comprender suavidad \(G^1\) y aproximación de \(C^1\).
+### 6.4 — Test de continuidad (splines y derivadas)
+- **Objetivo:** manipular tangentes para comprender suavidad G1 y aproximación de C1.
 - **Tarea:** modificar el vector tangente del segundo tramo para que sea proporcional al del primero.
-- **Conexión teórica:** continuidad geométrica \(G^1\) como criterio suficiente para suavidad perceptual.
+- **Conexión teórica:** continuidad geométrica G1 como criterio suficiente para suavidad perceptual.
+
 
 ---
 
