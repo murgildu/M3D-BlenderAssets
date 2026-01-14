@@ -1,51 +1,46 @@
 """
-Lab 01.1.1 — Traslación como suma de vectores (con HUD en viewport)
-==================================================================
+Lab 01.1.2 — Escalado respecto a un pivote (con HUD en viewport)
+===============================================================
+
+IMPORTANTE (HUD persistente)
+----------------------------
+Los HUDs se implementan con draw handlers, que pueden persistir en la sesión de Blender
+aunque se cargue un archivo .blend nuevo. Por ello, este script elimina cualquier HUD
+previo de prácticas antes de instalar el suyo.
 
 Modelo teórico
 --------------
-P' = P + t
+P' = C + k (P - C)
 
 Guía UI
 -------
-1) Ejecutar este script (elimina la escena y crea el laboratorio).
+1) Ejecutar este script (borra la escena, crea el laboratorio y activa el HUD).
 2) Mover "P_user" (G) hasta coincidir con "P_target".
-3) El HUD muestra error y PASS/FAIL.
-4) (Opcional) Ejecutar el checker: check_01_1_1_translation.py
-
-Mini-diagrama ASCII
--------------------
-P_user  ---- mover ---->   P_target
-  |
-  |  t (vector)
-  v
-P  + t
-
-Nota (HUD persistente)
-----------------------
-Los HUDs se implementan con draw handlers y pueden persistir durante la sesión de Blender.
-Este script elimina HUDs previos conocidos antes de instalar el suyo.
+3) El HUD muestra error posicional y ratio radial respecto a C.
+4) (Opcional) Ejecutar el checker: check_01_1_2_scale_pivot.py
 """
 
 import bpy
 import blf
 from mathutils import Vector
 
-# -----------------------------
-# Configuración del ejercicio
-# -----------------------------
-LAB_COLLECTION_NAME = "Lab01_1_1_Translation"
+LAB_COLLECTION_NAME = "Lab01_1_2_ScalePivot"
 
-P_LOC = Vector((0.0, 0.0, 0.0))
-T_VEC = Vector((2.0, 1.0, 0.0))
+# Parámetros del ejercicio
+C_LOC = Vector((0.5, -0.5, 0.0))
+P_LOC = Vector((2.0, 1.0, 0.0))
+K_SCALE = 1.8
 
 ARROW_SHAFT_RADIUS = 0.03
 ARROW_HEAD_RADIUS = 0.08
 ARROW_HEAD_LENGTH = 0.25
 
-EPS = 0.02
+EPS_POS = 0.03
+EPS_RATIO = 0.05
 
-_HANDLER_KEY = "LAB01_1_1_TRANSLATION_DRAW_HANDLER"
+_HANDLER_KEY = "LAB01_1_2_SCALEPIVOT_DRAW_HANDLER"
+
+# Lista global de handlers conocidos (para limpiar HUDs de otros ejercicios)
 KNOWN_HANDLER_KEYS = [
     "LAB01_1_1_TRANSLATION_DRAW_HANDLER",
     "LAB01_1_2_SCALEPIVOT_DRAW_HANDLER",
@@ -72,7 +67,7 @@ def remove_all_known_lab_handlers() -> None:
 
 
 # -----------------------------
-# Limpieza total de la escena
+# Limpieza total de escena
 # -----------------------------
 def wipe_scene() -> None:
     try:
@@ -126,7 +121,7 @@ def create_empty_in_collection(
     size: float = 0.25,
 ) -> bpy.types.Object:
     empty = bpy.data.objects.new(name, None)
-    empty.empty_display_type = display  # "SPHERE", "CUBE", "ARROWS", ...
+    empty.empty_display_type = display
     empty.empty_display_size = size
     empty.location = location
     col.objects.link(empty)
@@ -199,26 +194,44 @@ def _draw_text(x: int, y: int, text: str, size: int = 14) -> None:
 def _hud_draw_callback() -> None:
     P_user = bpy.data.objects.get("P_user")
     P_target = bpy.data.objects.get("P_target")
+    P = bpy.data.objects.get("P")
+    C = bpy.data.objects.get("C_pivot")
 
-    x0, y0 = 20, 80
+    x0, y0 = 20, 92
     line = 18
 
-    _draw_text(x0, y0 + 3 * line, "Lab 01.1.1 — Traslación (P' = P + t)", size=16)
-    _draw_text(x0, y0 + 2 * line, "Acción: mover 'P_user' hasta 'P_target' (tecla G)", size=13)
+    _draw_text(x0, y0 + 4 * line, "Lab 01.1.2 — Escalado respecto a pivote", size=16)
+    _draw_text(x0, y0 + 3 * line, "Acción: mover 'P_user' hasta 'P_target' (tecla G)", size=13)
+    _draw_text(x0, y0 + 2 * line, "Modelo: P' = C + k (P - C)", size=13)
 
-    if P_user is None or P_target is None:
+    if any(o is None for o in (P_user, P_target, P, C)):
         _draw_text(x0, y0 + 1 * line, "Estado: objetos no encontrados (ejecutar el script).", size=13)
         return
 
-    err = (Vector(P_user.location) - Vector(P_target.location)).length
-    status = "PASS" if err < EPS else "FAIL"
+    err_pos = (Vector(P_user.location) - Vector(P_target.location)).length
+    status_pos = "PASS" if err_pos < EPS_POS else "FAIL"
 
-    _draw_text(x0, y0 + 1 * line, f"Error actual |P_user - P_target| = {err:.4f}", size=13)
-    _draw_text(x0, y0 + 0 * line, f"EPS = {EPS:.3f}   Estado = {status}", size=13)
+    d0 = (Vector(P.location) - Vector(C.location)).length
+    d1 = (Vector(P_user.location) - Vector(C.location)).length
+    ratio = (d1 / d0) if d0 > 1e-9 else float("inf")
+    status_ratio = "PASS" if abs(ratio - K_SCALE) < EPS_RATIO else "FAIL"
+
+    _draw_text(
+        x0, y0 + 1 * line,
+        f"Error posicional |P_user - P_target| = {err_pos:.4f}   (EPS_POS={EPS_POS:.3f})   {status_pos}",
+        size=13
+    )
+    _draw_text(
+        x0, y0 + 0 * line,
+        f"Ratio distancias dist(C,P_user)/dist(C,P) = {ratio:.3f}   (k={K_SCALE:.3f}, EPS_RATIO={EPS_RATIO:.3f})   {status_ratio}",
+        size=13
+    )
 
 
 def _install_hud_handler() -> None:
+    # Limpia handlers conocidos (incluye el propio) para evitar solapes
     remove_all_known_lab_handlers()
+
     handler = bpy.types.SpaceView3D.draw_handler_add(_hud_draw_callback, (), "WINDOW", "POST_PIXEL")
     bpy.app.driver_namespace[_HANDLER_KEY] = handler
 
@@ -231,29 +244,46 @@ def _tag_redraw_all_3dviews() -> None:
 
 
 # -----------------------------
-# Main
+# Lógica del ejercicio
 # -----------------------------
+def scale_point_about_pivot(P: Vector, C: Vector, k: float) -> Vector:
+    return C + k * (P - C)
+
+
 def main() -> None:
+    # 1) Asegurar que no queda ningún HUD anterior activo
     remove_all_known_lab_handlers()
+
+    # 2) Limpiar escena para reproducibilidad
     wipe_scene()
 
+    # 3) Crear laboratorio
     col = ensure_collection(LAB_COLLECTION_NAME)
 
-    create_empty_in_collection(col, "P", P_LOC, display="SPHERE", size=0.22)
-    create_empty_in_collection(col, "P_target", P_LOC + T_VEC, display="CUBE", size=0.22)
-    create_empty_in_collection(col, "P_user", P_LOC, display="SPHERE", size=0.26)
-    create_vector_arrow(col, "t_vector", P_LOC, T_VEC)
+    P_target_loc = scale_point_about_pivot(P_LOC, C_LOC, K_SCALE)
 
+    create_empty_in_collection(col, "C_pivot", C_LOC, display="ARROWS", size=0.30)
+    bpy.context.scene.cursor.location = C_LOC
+    bpy.context.scene["LAB01_1_2_K"] = float(K_SCALE)  # para checker parametrizable
+
+    create_empty_in_collection(col, "P", P_LOC, display="SPHERE", size=0.22)
+    create_empty_in_collection(col, "P_target", P_target_loc, display="CUBE", size=0.22)
+    create_empty_in_collection(col, "P_user", P_LOC, display="SPHERE", size=0.26)
+
+    create_vector_arrow(col, "k_vector", C_LOC, (P_target_loc - C_LOC))
+
+    # 4) Activar HUD
     _install_hud_handler()
     _tag_redraw_all_3dviews()
 
-    print("=== Lab 01.1.1 — Traslación ===")
+    print("=== Lab 01.1.2 — Escalado respecto a pivote ===")
     print("HUDs previos eliminados (si existían).")
     print("La escena previa ha sido eliminada.")
-    print(f"P      = {tuple(P_LOC)}")
-    print(f"t      = {tuple(T_VEC)}")
-    print(f"P+t    = {tuple(P_LOC + T_VEC)}")
-    print("Acción: mueve 'P_user' hasta coincidir con 'P_target'.")
+    print(f"C (pivote) = {tuple(C_LOC)}")
+    print(f"P          = {tuple(P_LOC)}")
+    print(f"k          = {K_SCALE}")
+    print(f"P_target   = {tuple(P_target_loc)}")
+    print("Acción: mover 'P_user' hasta coincidir con 'P_target'.")
     print("Colección creada:", LAB_COLLECTION_NAME)
 
 

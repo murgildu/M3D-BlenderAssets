@@ -2,13 +2,13 @@
 Checker Lab 01.1.1 — Traslación
 ===============================
 
-Valida que el usuario ha colocado P_user en P_target dentro de una tolerancia EPS.
+Valida que P_user se ha colocado en P_target dentro de la tolerancia EPS.
 """
 
 import bpy
 from mathutils import Vector
 
-EPS = 0.02  # Tolerancia más realista para ajuste manual (2 cm en unidades por defecto)
+EPS = 0.02
 
 
 def get_obj(name: str) -> bpy.types.Object:
