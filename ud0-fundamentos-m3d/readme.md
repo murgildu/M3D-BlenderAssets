@@ -13,6 +13,7 @@ El objetivo del repositorio es que el alumnado pueda **ver, medir y comprobar** 
 
 ## Estructura de los ejercicios
 
+```
 /
 ├─ README.md
 ├─ blender/
@@ -21,7 +22,7 @@ El objetivo del repositorio es que el alumnado pueda **ver, medir y comprobar** 
 │ ├─ assets/ # Recursos opcionales (texturas, .blend base, etc.)
 │ └─ templates/ # Plantillas utilitarias (helpers, utilidades)
 └─ LICENSE
-
+```
 
 
 ---
