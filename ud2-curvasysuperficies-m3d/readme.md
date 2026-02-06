@@ -1,4 +1,4 @@
-# Modelado 3D en Blender - Repaso de Fundamentos Matemáticos
+# Modelado 3D en Blender - Tema2 - Curvas y Superficies
 
 Este repositorio acompaña a la parte teórica vista en clase sobre las curvas y superficies en Blender.
 La teoría introduce los conceptos matemáticos en relación a los tipos de curvas, curvas de Bezier, Splines, Nurbs ... y las prácticas los trasladan a Blender mediante:
@@ -175,8 +175,5 @@ Los checkers típicamente reportan:
 
 ---
 
-## Licencia y contribuciones
-- La licencia del repositorio se especifica en `LICENSE`.
-- Se aceptan contribuciones mediante *pull requests* siguiendo el estilo de carpetas y nomenclatura establecida.
 
 
