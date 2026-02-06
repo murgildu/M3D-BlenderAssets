@@ -1,7 +1,7 @@
 # Modelado 3D en Blender - Repaso de Fundamentos Matemáticos
 
-Este repositorio acompaña a la parte teórica vista en clase sobre los fundamentos algebraicos para el Modelado 3D en Blender.
-La teoría introduce los conceptos matemáticos mínimos del álgebra vectorial y las prácticas los trasladan a Blender mediante:
+Este repositorio acompaña a la parte teórica vista en clase sobre las curvas y superficies en Blender.
+La teoría introduce los conceptos matemáticos en relación a los tipos de curvas, curvas de Bezier, Splines, Nurbs ... y las prácticas los trasladan a Blender mediante:
 
 - ejercicios reproducibles en escena,
 - scripts en Python (API de Blender),
@@ -86,63 +86,6 @@ Los checkers típicamente reportan:
 
 > Nota de compatibilidad (GitHub Markdown): en este README se evitan símbolos LaTeX que no se renderizan en GitHub (por ejemplo `epsilon`).
 > Cuando se use tolerancia numérica se escribirá como **EPS** y se definirá en cada script/checker (por ejemplo `EPS = 1e-5`).
-
----
-
-## Bloque 1 - Vectores y transformaciones
-
-### 1.1 - Traslación como suma de vectores
-- **Interfaz (UI):** mover un vértice u objeto aplicando un vector de traslación dado.
-- **Python:** crear un punto `P`, un vector `t` y calcular `P' = P + t`.
-- **Visualización:** flechas de `P`, `t` y `P'`.
-- **Verificación (checker):** `dist(P', P + t) < EPS`.
-
-### 1.2 - Escalado respecto a un pivote
-- **Interfaz (UI):** escalar un conjunto de vértices respecto al *3D Cursor* (pivote).
-- **Python:** implementar `P' = C + k(P - C)` y comparar con la transformación aplicada por Blender.
-- **Visualización:** antes/después y líneas al pivote `C`.
-- **Verificación (checker):** `abs( dist(P', C) / dist(P, C) - k ) < EPS` (para puntos con `P != C`).
-
-### 1.3 - Norma (módulo) y normalización
-- **Interfaz (UI):** medir distancias y compararlas con la longitud de un vector.
-- **Python:** normalizar `v_hat = v / |v|` y verificar que `|v_hat| = 1`.
-- **Visualización:** flecha original y flecha normalizada.
-- **Verificación (checker):** `abs(|v_hat| - 1) < EPS`.
-
-### 1.4 - Inspector de vectores (álgebra lineal con `mathutils`)
-- **Objetivo:** validar posiciones, distancias y ángulos entre objetos usando `mathutils`.
-- **Tarea (Python):** con dos objetos seleccionados (`bpy.context.selected_objects`), calcular:
-  - vector diferencia `d = B.location - A.location` y su distancia `|d|`,
-  - producto escalar entre los ejes Y locales (vectores frontales),
-  - ángulo en grados entre dichos ejes.
-- **Conexión teórica:** dot cercano a 1 si las orientaciones coinciden; cercano a 0 si son perpendiculares.
-
----
-
-## Bloque 2 - Producto escalar: ángulo, ortogonalidad y sombreado
-
-### 2.1 - Producto escalar como medida de alineamiento
-- **Interfaz (UI):** rotar un objeto/flecha y observar el cambio angular.
-- **Python:** calcular `dot(u, v)`, `cos(theta)` y `theta`; mostrar resultados.
-- **Visualización:** etiqueta o indicador con dot y ángulo.
-
-### 2.2 - Ortogonalidad: construcción de un vector perpendicular
-- **Interfaz (UI):** construir una dirección perpendicular en el plano XY y comprobarlo.
-- **Python:** generar `u = (a, b)` y `v = (-b, a)` y verificar `dot(u, v) = 0`.
-- **Verificación (checker):** `abs(dot(u, v)) < EPS`.
-
-### 2.3 - Sombreado difuso tipo Lambert con normales
-- **Interfaz (UI):** plano + luz direccional; rotación del plano y observación del brillo.
-- **Python:** leer normal `N` y dirección a luz `L`, calcular `I = max(0, dot(N, L))` y mapear a material/color.
-- **Visualización:** cambio de color según `I`.
-- **Verificación (checker):**
-  - caso ortogonal: `I` cercano a 0,
-  - caso alineado: `I` cercano a 1 (si `N` y `L` están normalizados).
-
-### 2.4 - Normales y sombreado por umbral (producto escalar)
-- **Objetivo:** colorear caras según umbral de iluminación.
-- **Tarea (Python):** iterar polígonos y colorear si `dot(n, L) > 0.5`.
-- **Conexión teórica:** uso del producto escalar como criterio de alineamiento entre normal y luz.
 
 ---
 
