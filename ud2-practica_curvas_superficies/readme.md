@@ -121,6 +121,20 @@ Objetivo: validar que tu código dentro de Blender funciona, antes de dibujar el
    - muestrea puntos con `bezier_point`,
    - crea una polilínea (mesh) con esos puntos.
 
+Puedes utilizar este código auxiliar para definir los puntos:
+
+```
+from mathutils import Vector
+
+# Puntos de control (editables)
+P0 = Vector((0.0, 0.0, 0.0))
+P1 = Vector((1.5, 2.0, 0.0))
+P2 = Vector((3.0, -2.0, 0.0))
+P3 = Vector((4.5, 0.0, 0.0))
+```
+
+Puedes utilizar el cursor 3D para posicionar puntos relevantes y encontrar la posición (x,y,z) fácilmente mirando en la barra lateral la **location** del 3DCursor.
+
 ### Resultado esperado
 - En la escena aparece una curva de prueba como polilínea.
 - Puedes cambiar P0..P3 y re-ejecutar el script para ver cambios.
