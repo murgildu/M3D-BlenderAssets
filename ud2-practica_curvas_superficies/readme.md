@@ -141,6 +141,68 @@ Puedes utilizar el cursor 3D para posicionar puntos relevantes y encontrar la po
 
 Si este paso falla, NO sigas al logo: arregla primero el pipeline (código → geometría).
 
+
+Aquí tienes código helper para convertir los puntos en mesh de blender, si quieres puedes definir otra librería para estos helpers:
+
+```
+import bpy
+from mathutils import Vector
+import numpy as np
+
+# Ejecuta el texto "P2_LIB"
+lib_text = bpy.data.texts["P2_LIB"]
+exec(lib_text.as_string(), globals())
+
+# -----------------------------
+# Helpers: polilínea mesh
+# -----------------------------
+def build_polyline_mesh(name: str, points_xyz, close: bool = False):
+    """
+    Crea un objeto Mesh con una polilínea:
+      - points_xyz: iterable de puntos (x,y,z) o numpy array (N,3)
+      - close: si True, cierra la curva uniendo último con primero
+    """
+    # Convertimos a lista de tuplas (x,y,z)
+    verts = [tuple(map(float, p)) for p in points_xyz]
+    if len(verts) < 2:
+        raise ValueError("Se necesitan al menos 2 puntos para una polilínea")
+
+    edges = [(i, i + 1) for i in range(len(verts) - 1)]
+    if close:
+        edges.append((len(verts) - 1, 0))
+
+    mesh = bpy.data.meshes.new(name + "_Mesh")
+    mesh.from_pydata(verts, edges, [])
+    mesh.update()
+
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    return obj
+
+
+También puedes convertir estos puntos a curvas Bézier, igual que hicimos en los ejemplos del tema 2.
+
+# -----------------------------
+# Puntos de control (editables)
+# -----------------------------
+P0 = Vector((-3.8199, 0, -1.68171))
+P1 = Vector((-2.8199, 0, -1.68171))
+P2 = Vector((-1.8199, 0, -1.68171))
+P3 = Vector(( 0.8199, 0, -1.68171))
+
+P = np.array([P0[:], P1[:], P2[:], P3[:]], dtype=float)
+
+# -----------------------------
+# Muestreo + creación de mesh
+# -----------------------------
+pts = bezier_curve(P, num_samples=40)   # <- esto debería devolver (40,3)
+curve_obj = build_polyline_mesh("BezierPolyline1", pts, close=False)
+
+# (Opcional) seleccionar el objeto para verlo fácil
+bpy.ops.object.select_all(action="DESELECT")
+curve_obj.select_set(True)
+bpy.context.view_layer.objects.active = curve_obj
+```
 ---
 
 ## 2.3 Trazo del logo por tramos (curvas cúbicas)
