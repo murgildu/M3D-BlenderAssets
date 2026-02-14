@@ -156,7 +156,7 @@ Objetivo: construir el contorno del logo como una unión de segmentos cúbicos.
    - P0 y P3: extremos del tramo
    - P1 y P2: controlan la tangente/curvatura
 
-3) Muestras cada segmento con tu función `bezier_point` y esta los cose en una sola polilínea.
+3) Muestras cada segmento con tu función `bezier_point` / `bezier_curve` y esta los cose en una sola polilínea.
 
 ### Qué se evalúa aquí
 - Que el contorno sea reconocible y se ajuste razonablemente a la referencia.
