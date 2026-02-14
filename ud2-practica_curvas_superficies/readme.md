@@ -253,12 +253,18 @@ Objetivo: convertir el contorno en un logo 3D imprimible/usable.
   - `Bevel` para redondear
   - `Fill` activado
 
-### Opción B (universal): convertir a mesh y extruir
+- También puedes exportar a mesh y extruir desde ahí
+
 1) Selecciona el contorno
 2) `Object > Convert > Mesh`
 3) En Edit Mode:
    - `E` para extruir
    - `Ctrl+B` o bevel modifier para cantos
+
+
+### Opción B (universal): Si construiste un mesh
+
+Primero tendrás que cerrar la polilínea, p.e., con extrusión, merge de puntos, fill o construyendo el mesh con close=True y entonces podrás dar volumen con un modificador (Solidify)
 
 **Recomendación de calidad**
 - Aplica transformaciones (`Ctrl+A`)
