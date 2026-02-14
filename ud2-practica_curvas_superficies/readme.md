@@ -88,11 +88,10 @@ Consejo: no copies todo el script. Copia solo funciones + imports necesarios.
  También puedes realizar la práctica con cualquier otro logo que te guste :)
 
 Para añadir otro logo, sigue estos pasos:
-- `Add > Empty > Image`
-- Selecciona la imagen del logo.
 - Ve a **vista frontal ortográfica**:
   - Numpad `1` (Front)
-  - Numpad `5` (Ortho)
+  - Numpad `5` (Ortho)W
+- `Add > Image > Reference` (puedes hacerlo algo transparente en Data Object properties para trabajar más cómodamente)
 - Ajusta posición/escala para que quede centrada.
 
 Crea (o usa) una colección llamada `REFERENCE` y mete ahí la imagen.
