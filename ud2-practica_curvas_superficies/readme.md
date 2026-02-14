@@ -105,10 +105,8 @@ En Blender:
 3) Copia aquí las funciones necesarias desde `python/scripts_auxiliares`.
 
 Recomendación mínima para arrancar:
-- `import math`
-- funciones de Bernstein
-- `bezier_point`
-- De Casteljau (al menos `de_casteljau_levels` o `de_casteljau_point`)
+- `import math` , `import numpy as np`
+- importa funciones de Bernstein, Bezier, De Casteljau, ... mencionadas anteriormente y/o que consideres relevantes. 
 
 Así conseguimos que nuestro `.blend` sea autosuficiente y no depender de archivos externos al entregar.
 
