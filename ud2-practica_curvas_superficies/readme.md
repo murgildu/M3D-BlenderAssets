@@ -243,8 +243,34 @@ Esto te da un flujo de trabajo real:
 - ajustas localmente.
 
 ---
+## 2.5 Refinado y Unificación: De Segmentos Bézier a B-Spline Global
 
-## 2.5 De curva a objeto 3D (extrusión / bevel / mesh)
+Tras haber trazado el logo mediante segmentos cúbicos de Bézier independientes, el resultado puede presentar discontinuidades en las uniones. Para profesionalizar el acabado, evolucionamos el diseño utilizando los puntos de control definidos en la fase anterior para alimentar una estructura de **B-Spline**.
+
+### A) Extracción y "Cosido" de Puntos de Control
+El primer paso consiste en recopilar los puntos de control ($P_0, P_1, P_2, P_3$) de cada segmento Bézier correlativo.
+
+* **Lógica de unión:** Para que la transición sea fluida, eliminamos los puntos duplicados en las juntas (donde el $P_3$ de un tramo coincide con el $P_0$ del siguiente) y creamos una lista única de puntos de control.
+* **Ventaja:** Al pasar esta lista a la función `bspline_curve`, la matemática de la B-Spline se encarga de promediar la curvatura, eliminando cualquier "pico" visual indeseado en las uniones.
+
+
+
+### B) Implementación de la B-Spline Global
+Utilizando la función `bspline_curve` de nuestra `P2_LIB`, generamos una sola polilínea para todo el contorno (ej. el casco o las gafas).
+
+* **Grado 3 (Cúbica):** Mantenemos el grado 3 para asegurar una **continuidad de curvatura $C^2$**. Esto significa que no solo la posición y la tangente coinciden, sino que la "suavidad" de la curva es constante en todo el trayecto.
+* **Control Local:** A pesar de ser una curva única, gracias al algoritmo de **De Boor**, podemos reajustar un punto de control específico del logo sin que se deforme el resto del trazado.
+
+
+
+### C) Tratamiento de Esquinas y Precisión (NURBS)
+No todas las partes del logo deben ser infinitamente suaves; algunas requieren precisión geométrica o ángulos marcados.
+
+* **Esquinas afiladas:** Si el logo tiene un ángulo marcado, colocamos **tres puntos de control en la misma ubicación**. Esto reduce la continuidad localmente y "fuerza" a la B-Spline a pasar exactamente por ese vértice.
+* **Uso de Pesos ($w$):** Si una zona requiere una curvatura que no se ajusta con puntos normales (como un arco de circunferencia exacto), transformamos el tramo en **NURBS** aumentando el peso del punto de control. Un peso $w > 1$ "tensa" la curva hacia el punto, permitiendo ajustar el diseño con precisión milimétrica sin necesidad de añadir más geometría compleja.
+
+
+## 2.6 De curva a objeto 3D (extrusión / bevel / mesh)
 Objetivo: convertir el contorno en un logo 3D imprimible/usable.
 
 ### Opción A (rápida): trabajar como Curve 2D y extruir
@@ -273,7 +299,7 @@ Primero tendrás que cerrar la polilínea, p.e., con extrusión, merge de puntos
 
 ---
 
-## 2.6 Materiales y presentación
+## 2.7 Materiales y presentación
 Mínimo requerido:
 - asignar un material (un color/plástico sencillo)
 - una iluminación básica
@@ -286,7 +312,7 @@ Extra (sube nota):
 
 ---
 
-## 2.7 (Opcional) Exportación STL
+## 2.8 (Opcional) Exportación STL
 Si tu modelo es sólido:
 - `File > Export > STL`
 - Comprueba escala/unidades según lo trabajado en la asignatura.
@@ -299,18 +325,21 @@ Si tu modelo es sólido:
 - [ ] Hay al menos dos Text blocks:
   - [ ] `P2_LIB` con funciones copiadas
   - [ ] `P2_BUILD_LOGO` con el script que genera/actualiza geometría
-- [ ] El contorno se construye (total o parcialmente) con tu código (no solo “a mano”).
+- [ ] Un contorno construido (total o parcialmente) con tu código (no solo “a mano”).
+- [ ] Un contorno hecho con una BSpline única (puede ser de todo el logo o de una parte).
 - [ ] El logo final tiene grosor (extrusión) y acabado básico (material/bevel).
 - [ ] La escena está razonablemente limpia y ordenada.
 
 ---
 
-# Sugerencia de organización de tiempo (~7h)
+# Sugerencia de organización de tiempo (~8h)
 - Parte 1 (Python): 2h 30m 
 - Parte 2 (Blender):
   - Setup + pipeline de prueba: 45m
   - Trazado por tramos: 2h
   - Refinado (subdivisión) + limpieza: 45m
+  - Refinado y Unificación con Bsplines 45m
+  - Tratamiento esquinas Nurbs: 45m
   - Extrusión + materiales + render: 30m
 
 ---
